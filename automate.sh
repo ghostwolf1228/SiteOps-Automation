@@ -116,9 +116,9 @@ function rcom {
 		rack=$1
 		printf "Information for rack '$1'\n"
 		printf "Burnin and verification statuses for the specified rack.\n\n"
-		printf "Hostname\t\t\t CPU\t   Disk\t     Ram       Ver Sku\t PV"
+		printf "Hostname\t\t\t Ver Sku   RAM\tDisk\tCPU\tPV\tPlatform"
 		printf "\n--------------------------------------------------------------------------------\n"
-		loony -D smf1 -l "%(facts:hostname)s,%(attributes:burnin_cpu)s,%(attributes:burnin_disk)s,%(attributes:burnin_ram)s,%(attributes:wilson_verify_sku)s,%(attributes:physical_verification)s" -g rack:$1 | sort
+		loony -D smf1 -l "%(facts:hostname)s,%(attributes:wilson_verify_sku)s,%(attributes:burnin_ram)s,%(attributes:burnin_disk)s,%(attributes:burnin_cpu)s,%(attributes:physical_verification)s,%(groups:platform)s" -g rack:$1 | sort
 	fi
 }
 
@@ -218,6 +218,45 @@ function runProcess {
 		then
 			# Create new hosts list
 			newHostList
+		elif [[ ${args[0]} == "-sm" || ${args[1]} == "-sm" ]]
+                then
+			# NetEng Switch Mapping
+			netFile='~/git/neteng/switch_mapping_smf.py'
+			if [[ -e "~/git" ]]
+			then
+				printf "Git folder already created... Continuing...\n"
+			else
+				printf "Creating git folder...\n"
+				mkGit=`mkdir ~/git`
+				printf "Git folder created... Continuing...\n"
+			fi
+			if [[ -e $netFile ]]
+			then
+				printf "Proceeding with switch mapping"
+			else
+				printf "You don't have the NetEng Repository downloaded. We're downloading it now.\n"
+				getGit=`git clone https://git.twitter.biz/neteng ~/git/neteng`
+				printf "\nNetEng repository has been downloaded."
+			fi
+			printf "Did you want the AS switch or the MS switch? (as/ms): "; read usrChoice
+			if [[ $usrChoice == "as" || $usrChoice == "AS" ]]
+			then
+				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
+				if [[ -z $usrRack ]]
+				then
+					./$netFile AS
+				else
+					./$netFile AS | grep $usrRack
+				fi
+			else
+				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
+                                if [[ -z $usrRack ]]
+                                then
+                                    	./$netFile MS 
+                                else
+                                    	./$netFile MS |	grep $usrRack
+                                fi
+			fi
 		else
 			#Provctl command
 			if [[ ${args[0]} == "-r" || ${args[1]} == "-r" ]]
@@ -304,6 +343,7 @@ then
 	-iden	  Turn on identifier lights
 	-idenf	  Turn off identifier lights
 	-serv	  Get host's services and it's monitor status
+	-sm	  Switch Mapping - (rack, core port, core switch)
 	-unmon	  Unmonitor Hosts
 	-unbond	  Unbond hosts
 	-vbond	  Verify bond status
@@ -392,6 +432,10 @@ elif [[ ${args[0]} == "-serv" || ${args[1]} == "-serv" ]]
 then
 	#Get host's service and it's monitor status
 	runProcess loonyService "Get host's service and it's monitor status" 
+elif [[ ${args[0]} == "-sm" || ${args[1]} == "-sm"  ]]
+then
+	#Neteng Switch Mapping - neteng git repo required
+	runProcess switchMapping "NetEng Switch Mapping - Rack, Core Port, Core Switch"
 elif [[ ${args[0]} == "-vbond" || ${args[1]} == "-vbond" ]]
 then
 	#Verify bond status
