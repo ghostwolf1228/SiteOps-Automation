@@ -243,7 +243,6 @@ function runProcess {
 			if [[ $usrChoice == "as" || $usrChoice == "AS" ]]
 			then
 				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
-				usrRack=`$usrRack | tr [a-z] [A-Z]`
 				if [[ -z $usrRack ]]
 				then
 					~/$netFile AS | sort
