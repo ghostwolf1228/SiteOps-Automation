@@ -245,19 +245,34 @@ function runProcess {
 				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
 				if [[ -z $usrRack ]]
 				then
-					~/$netFile AS
+					~/$netFile AS | sort
 				else
 					~/$netFile AS | grep $usrRack
 				fi
 			else
 				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
-                                if [[ -z $usrRack ]]
-                                then
-                                    	~/$netFile MS 
-                                else
-                                    	~/$netFile MS |	grep $usrRack
-                                fi
+                                if [[ ${usrRack} > 3 ]]
+					# Looking into how this will work... Need to be able to utilize a range of racks.
+				else
+					if [[ -z $usrRack ]]
+                                	then
+                                    		~/$netFile MS | sort
+                      	        	else
+                                    		~/$netFile MS |	grep $usrRack
+                               		fi
+				fi
 			fi
+		elif [[ ${args[0]} == "-mt" || ${args[1]} == "-mt" ]]
+                then
+			printf "Specify a rack triplet:"; read rack
+			loony -D smf1 -e network -H smf1-$rack-as1-1.net.twitter.com unset attribute unmonitored:true
+			loony -D smf1 -e network -H smf1-$rack-as1-1.net.twitter.com set attribute loopback:true
+			loony -D smf1 -e network -H smf1-$rack-as1-1.net.twitter.com unset attribute skip_nagios:true
+			printf "\nsmf1-$rack-as1-1.net.twitter.com has been completed, working on smf1-$rack-ms1-1.net.twitter.com\n"
+			loony -D smf1 -e network -H smf1-$rack-ms1-1.net.twitter.com unset attribute unmonitored:true
+			loony -D smf1 -e network -H smf1-$rack-ms1-1.net.twitter.com set attribute loopback:true
+                        loony -D smf1 -e network -H smf1-$rack-ms1-1.net.twitter.com unset attribute skip_nagios:true
+			printf "\nsmf1-$rack-ms1-1.net.twitter.com has been completed! No further actions required!\n"
 		else
 			#Provctl command
 			if [[ ${args[0]} == "-r" || ${args[1]} == "-r" ]]
@@ -337,6 +352,7 @@ then
 	-Ca	  Clear problem attributes - forced confirmation
 	-Ci	  Reinstall cronus platform
 	-Fd [mfg] Get failed drives for host - [mfg] for manufacturer [hp & hyve]
+	-mt	  TOR monitoring (nagios)
 	-Nhl	  Remove old Hosts List and create a new one
 	-Pb [abc] Get a rack's burnin, sku verification, and physical verification statuses - must be the only arguments
 	-Ps	  Get host's power status (IPMI testing)
@@ -413,6 +429,10 @@ elif [[ ${args[0]} == "-Fd" || ${args[1]} == "-Fd" ]]
 then
     	#Get power status
         runProcess failedDrive  "Get Failed drives"
+elif [[ ${args[0]} == "-mt" || ${args[1]} == "-mt" ]]
+then
+        #TOR Monitoring (nagios)
+        runProcess monTor  "Set tor switches into monitoring mode"
 elif [[ ${args[0]} == "-Nhl" || ${args[1]} == "-Nhl" ]]
 then
 	#Create new hosts list
