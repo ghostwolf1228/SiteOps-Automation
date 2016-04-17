@@ -221,13 +221,14 @@ function runProcess {
 		elif [[ ${args[0]} == "-sm" || ${args[1]} == "-sm" ]]
                 then
 			# NetEng Switch Mapping
-			netFile='~/git/neteng/switch_mapping_smf.py'
-			if [[ -e "~/git" ]]
+			usrName=`whoami`
+			netFile='/Users/$usrName/git/neteng/switch_mapping_smf.py'
+			if [[ -e "/Users/$usrName/git" ]]
 			then
 				printf "Git folder already created... Continuing...\n"
 			else
 				printf "Creating git folder...\n"
-				mkGit=`mkdir ~/git`
+				mkGit=`mkdir /Users/$usrName/git`
 				printf "Git folder created... Continuing...\n"
 			fi
 			if [[ -e $netFile ]]
