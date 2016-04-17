@@ -243,7 +243,7 @@ function runProcess {
 			if [[ $usrChoice == "as" || $usrChoice == "AS" ]]
 			then
 				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
-				echo ${usrRack^^}
+				echo $usrRack | tr [a-z] [A-Z]
 				exit
 				if [[ -z $usrRack ]]
 				then
