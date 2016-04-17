@@ -180,6 +180,11 @@ function runProcess {
 		then
 			#Unbond hosts
 			lom.sh --swunbond -y -F $theFile
+		elif [[ ${args[0]} == "-unmon" || ${args[1]} == "-unmon" ]]
+                then
+			#Unmonitor hosts
+			cmd=`loony -F $theFile set attribute unmonitored:99999999999999`
+			printf "Hosts unmonitored\n"
 		elif [[ ${args[0]} == "-iden" || ${args[1]} == "-iden" ]]
 		then
 			#Turn on identifier lights indefinitely
@@ -217,7 +222,31 @@ function runProcess {
 			#Provctl command
 			if [[ ${args[0]} == "-r" || ${args[1]} == "-r" ]]
 			then
-				lom.sh --swunbond -y -F $theFile
+				# This argument is for the rekick option. It checks if the platform is a gemini or yellowjacket and asks the user
+				# if they want to update the sku to accomedate a boot drive swap that gets upgraded to a 1TB drive.
+				hostPlatform=`loony -F $theFile -l "%(groups:base_platform)s"`
+				if [[ $hostPlatform == *"gemini"* || $hostPlatform == *"Gemini"* || $hostPlatform == *"yellowjacket"* || $hostPlatform == *"Yellowjacket"* ]]
+				then
+					printf "\n1 or more Gemini hosts found. When replacing the boot drive, the sku may need to be updated to accomedate the upgraded 1 TB drive. Would you like to update the sku? (y/n)"; read skuConfirm
+					if [[ $skuConfirm == "y" || $skuConfirm == "Y" || $skuConfirm == "yes" || $skuConfirm == "Yes" ]]
+					then
+						while read host; do
+							platformConfirm=`loony -H $host -l "%(groups:base_platform)s"`
+							if [[ $platformConfirm == "gemini" || $platformConfirm == "Gemini" ]]
+							then
+								cmd=`loony -H $host set attribute sku_signature:2xIntel.R.Xeon.R.CPUE5645_M72_N2_S0_D25000`
+							elif [[ $platformConfirm == "yellowjacket" || $platformConfirm = "Yellowjacket" ]]
+							then
+								cmd=`loony -H $host set attribute sku_signature:2xIntel.R.Xeon.R.CPUE5620_M48_N2_S0_D25000`
+							fi
+						done <$theFile
+						printf "SKU successfully changed for all hosts\n"
+					fi
+				else
+					printf "SKU was NOT changed for hosts\n"
+				fi
+				cmd=`lom.sh --swunbond -y -F $theFile`
+				printf "Unbonding complete for all hosts\n"
 			fi
 			provctl -N $doProc - < $theFile
 		fi
@@ -275,7 +304,8 @@ then
 	-iden	  Turn on identifier lights
 	-idenf	  Turn off identifier lights
 	-serv	  Get host's services and it's monitor status
-	-ubond	  Unbond hosts
+	-unmon	  Unmonitor Hosts
+	-unbond	  Unbond hosts
 	-vbond	  Verify bond status
 
 "
@@ -366,6 +396,10 @@ elif [[ ${args[0]} == "-vbond" || ${args[1]} == "-vbond" ]]
 then
 	#Verify bond status
 	runProcess verifybond "Verify Bond Status"
+elif [[ ${args[0]} == "-unmon" || ${args[1]} == "-unmon" ]]
+then
+	#Unmonitor hosts
+	runProcess monitor "Unmonitor Hosts"
 elif [[ ${args[0]} == "-unbond" || ${args[1]} == "-unbond" ]]
 then
 	#Unbond hosts
