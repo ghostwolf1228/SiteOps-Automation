@@ -251,16 +251,12 @@ function runProcess {
 				fi
 			else
 				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
-                                if [[ ${usrRack} > 3 ]]
-					# Looking into how this will work... Need to be able to utilize a range of racks.
-				else
-					if [[ -z $usrRack ]]
-                                	then
-                                    		~/$netFile MS | sort
-                      	        	else
-                                    		~/$netFile MS |	grep $usrRack
-                               		fi
-				fi
+				if [[ -z $usrRack ]]
+                                then
+                                    	~/$netFile MS | sort
+                      	        else
+                                	~/$netFile MS |	grep $usrRack
+                        	fi
 			fi
 		elif [[ ${args[0]} == "-mt" || ${args[1]} == "-mt" ]]
                 then
