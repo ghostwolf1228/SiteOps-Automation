@@ -248,7 +248,7 @@ function runProcess {
 				then
 					~/$netFile AS | sort
 				else
-					~/$netFile AS | grep ${usrRack^^}
+					~/$netFile AS | grep $usrRack
 				fi
 			else
 				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
@@ -256,7 +256,7 @@ function runProcess {
                                 then
                                     	~/$netFile MS | sort
                       	        else
-                                	~/$netFile MS |	grep ${usrRack^^}
+                                	~/$netFile MS |	grep $usrRack
                         	fi
 			fi
 		elif [[ ${args[0]} == "-mi" || ${args[1]} == "-mi" ]]
