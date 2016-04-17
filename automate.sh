@@ -239,15 +239,16 @@ function runProcess {
 				getGit=`git clone https://git.twitter.biz/neteng ~/git/neteng`
 				printf "\nNetEng repository has been downloaded."
 			fi
-			printf "Did you want the AS switch or the MS switch? (as/ms): "; read usrChoice
+			printf "\nDid you want the AS switch or the MS switch? (as/ms): "; read usrChoice
 			if [[ $usrChoice == "as" || $usrChoice == "AS" ]]
 			then
 				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
+				
 				if [[ -z $usrRack ]]
 				then
 					~/$netFile AS | sort
 				else
-					~/$netFile AS | grep $usrRack
+					~/$netFile AS | grep ${usrRack^^}
 				fi
 			else
 				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
@@ -255,7 +256,7 @@ function runProcess {
                                 then
                                     	~/$netFile MS | sort
                       	        else
-                                	~/$netFile MS |	grep $usrRack
+                                	~/$netFile MS |	grep ${usrRack^^}
                         	fi
 			fi
 		elif [[ ${args[0]} == "-mi" || ${args[1]} == "-mi" ]]
