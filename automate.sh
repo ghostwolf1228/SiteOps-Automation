@@ -223,7 +223,7 @@ function runProcess {
 			# NetEng Switch Mapping
 			usrName=`whoami`
 			netFile='git/neteng/switch_mapping_smf.py'
-			if [[ -d "~/git" ]]
+			if [[ ! -d "~/git" ]]
 			then
 				printf "Git folder already created... Continuing...\n"
 			else
@@ -231,7 +231,7 @@ function runProcess {
 				mkGit=`mkdir /Users/$usrName/git`
 				printf "Git folder created... Continuing...\n"
 			fi
-			if [[ -d "~/git/neteng" ]]
+			if [[ ! -d "~/git/neteng" ]]
 			then
 				printf "Git repository exists, proceeding with switch mapping"
 			else
