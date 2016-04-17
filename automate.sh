@@ -223,7 +223,7 @@ function runProcess {
 			# NetEng Switch Mapping
 			usrName=`whoami`
 			netFile='git/neteng/switch_mapping_smf.py'
-			if [[ -e "~/git" ]]
+			if [[ -d "~/git" ]]
 			then
 				printf "Git folder already created... Continuing...\n"
 			else
@@ -231,9 +231,9 @@ function runProcess {
 				mkGit=`mkdir /Users/$usrName/git`
 				printf "Git folder created... Continuing...\n"
 			fi
-			if [[ -e $netFile ]]
+			if [[ -d "~/git/neteng" ]]
 			then
-				printf "Proceeding with switch mapping"
+				printf "Git repository exists, proceeding with switch mapping"
 			else
 				printf "You don't have the NetEng Repository downloaded. We're downloading it now.\n"
 				getGit=`git clone https://git.twitter.biz/neteng ~/git/neteng`
@@ -258,6 +258,10 @@ function runProcess {
                                 	~/$netFile MS |	grep $usrRack
                         	fi
 			fi
+		elif [[ ${args[0]} == "-mi" || ${args[1]} == "-mi" ]]
+		then
+			printf "Which zone? "; read zone
+			~/git/neteng/tools_dev $ ./aud_rackify.py -u $zone			
 		elif [[ ${args[0]} == "-mt" || ${args[1]} == "-mt" ]]
                 then
 			printf "Specify a rack triplet:"; read rack
@@ -348,6 +352,7 @@ then
 	-Ca	  Clear problem attributes - forced confirmation
 	-Ci	  Reinstall cronus platform
 	-Fd [mfg] Get failed drives for host - [mfg] for manufacturer [hp & hyve]
+	-mi	  Audubon Injection of Network Devices
 	-mt	  TOR monitoring (nagios)
 	-Nhl	  Remove old Hosts List and create a new one
 	-Pb [abc] Get a rack's burnin, sku verification, and physical verification statuses - must be the only arguments
@@ -425,6 +430,10 @@ elif [[ ${args[0]} == "-Fd" || ${args[1]} == "-Fd" ]]
 then
     	#Get power status
         runProcess failedDrive  "Get Failed drives"
+elif [[ ${args[0]} == "-mi" || ${args[1]} == "-mi" ]]
+then
+        #Audubon Injection of Network Devices
+        runProcess audInj  "Audubon Injection of Network Devices"
 elif [[ ${args[0]} == "-mt" || ${args[1]} == "-mt" ]]
 then
         #TOR Monitoring (nagios)
