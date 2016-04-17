@@ -244,17 +244,17 @@ function runProcess {
 				printf "Specify a rack, leave blank if you want the whole file: "; read usrRack
 				if [[ -z $usrRack ]]
 				then
-					./$netFile AS
+					$netFile AS
 				else
-					./$netFile AS | grep $usrRack
+					$netFile AS | grep $usrRack
 				fi
 			else
 				printf "Specify a rack, leave blank if you want the whole file: "; read	usrRack
                                 if [[ -z $usrRack ]]
                                 then
-                                    	./$netFile MS 
+                                    	$netFile MS 
                                 else
-                                    	./$netFile MS |	grep $usrRack
+                                    	$netFile MS |	grep $usrRack
                                 fi
 			fi
 		else
